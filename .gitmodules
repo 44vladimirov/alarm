@@ -1,0 +1,3 @@
+[submodule "cppsndio"]
+	path = cppsndio
+	url = git@github.com:44vladimirov/cppsndio.git
