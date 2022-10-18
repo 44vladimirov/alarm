@@ -1,14 +1,13 @@
 #include "Alarm.hpp"
 #include "CmdArgs.hpp"
 
-#include <SndioPlayback.hpp>
+#include <SndioDevice.hpp>
 
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <istream>
 #include <thread>
 #include <vector>
 
@@ -41,13 +40,13 @@ static bool CheckHeader(RiffWaveHeader const& header) {
         ;
 }
 
-static bool PlayStream(std::istream & stream, sndio::SndioPlaybackDevice & device) {
+static bool PlayStream(std::istream & stream, sndio::PlaybackDevice & device) {
     static std::vector<char> buffer(alarm::defaultBufferSize);
     bool result = false;
 
     for (result = stream.good(); result && stream.good(); stream.peek()) {
         size_t const size = stream.readsome(buffer.data(), buffer.size());
-        result = device.Play(buffer.data(), size);
+        result = size == device.Play(buffer.data(), size);
     }
 
     return result;
@@ -79,19 +78,19 @@ int main(int const argc, char const * const argv[]) {
         terminate(alarm::ErrCode::soundHeader);
     }
 
-    sndio::SndioPlaybackDevice playbackDevice;
-    if (!playbackDevice.Open()) {
+    sndio::PlaybackDevice device;
+    if (!device.Open()) {
         terminate(alarm::ErrCode::sndioOpen);
     }
     sndio::AudioFormat const format(header.bitsPerSample, header.sampleRate, header.channels);
-    if (!playbackDevice.Start(format)) {
+    if (!device.Start(format)) {
         terminate(alarm::ErrCode::sndioStart);
     }
 
     for (unsigned long count = 0; args.infinite || count < args.count; ++count) {
         soundStream.clear();
         soundStream.seekg(sizeof(RiffWaveHeader));
-        if (!PlayStream(soundStream, playbackDevice)) {
+        if (!PlayStream(soundStream, device)) {
             terminate(alarm::ErrCode::sndioPlay);
         }
 

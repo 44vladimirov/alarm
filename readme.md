@@ -11,5 +11,5 @@ alarm [-r count] [-R] [-f] [-t timeout] [sound]
 * `sound` alarm sound file name
 
 `sndio` library is required. \
-Sound file format is expected to be [waveform](https://en.wikipedia.org/wiki/WAV). \
+Sound file format is expected to be [waveform](https://en.wikipedia.org/wiki/WAV) PCM. \
 If no sound is specified, `/usr/local/etc/alarm` is tried to play.
